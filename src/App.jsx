@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Typography from "@mui/joy/Typography";
 import Card from "@mui/joy/Card";
 import Button from "@mui/joy/Button";
@@ -7,11 +7,19 @@ import CardContent from "@mui/joy/CardContent";
 import Grid from "@mui/joy/Grid";
 import Checkbox from "@mui/joy/Checkbox";
 import Sheet from "@mui/joy/Sheet";
-import { Box } from "@mui/joy";
+import Slider from "@mui/joy/Slider";
 
 function App() {
   const [items, setItems] = useState([]);
   const [showList, setShowList] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const checkedCount = items.filter((item) => item.packed).length;
+    const totalCount = items.length;
+    const percentage = totalCount > 0 ? (checkedCount / totalCount) * 100 : 0;
+    setProgress(percentage);
+  }, [items]);
 
   function handleAddItems(item) {
     setItems((items) => [...items, item]);
@@ -35,6 +43,23 @@ function App() {
     }
   }
 
+  function handleCheckboxToggle(itemId) {
+    setItems(
+      items
+        .map((item) => {
+          if (item.id === itemId) {
+            return { ...item, packed: !item.packed };
+          }
+          return item;
+        })
+        .sort((a, b) => a.packed - b.packed)
+    );
+  }
+
+  const updateItems = (updateItems) => {
+    setItems(updateItems);
+  };
+
   return (
     <div className="app">
       <div className="container">
@@ -46,6 +71,9 @@ function App() {
               items={items}
               onDeleteItem={handleDeleteItem}
               onEditItem={handleEditItem}
+              onCheckboxToggle={handleCheckboxToggle}
+              progress={progress}
+              updateItems={updateItems}
             />
           </div>
         )}
@@ -58,7 +86,7 @@ function Header() {
   return (
     <div className="header">
       <Typography color="success" level="h1" variant="plain">
-        To Do List
+        To Do List 🗒️
       </Typography>
     </div>
   );
@@ -109,10 +137,17 @@ function Form({ onHandleAddItems, setShowList }) {
   );
 }
 
-function ListTasks({ items, onDeleteItem, onEditItem }) {
+function ListTasks({
+  items,
+  onDeleteItem,
+  onEditItem,
+  onCheckboxToggle,
+  progress,
+  updateItems,
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTaskText, setEditedTaskText] = useState("");
-  const [editedTaskId, setEditedTaskId] = useState("");
+  const [editedTaskId, setEditedTaskId] = useState(null);
 
   const handleEditClick = (taskId, taskText) => {
     setIsEditing(true);
@@ -124,14 +159,29 @@ function ListTasks({ items, onDeleteItem, onEditItem }) {
     onEditItem(editedTaskId, editedTaskText);
     setIsEditing(false);
     setEditedTaskText("");
-    setEditedTaskId("");
+    setEditedTaskId(null);
   };
 
   const handleCancelEdit = () => {
     setIsEditing(false);
     setEditedTaskText("");
-    setEditedTaskId("");
+    setEditedTaskId(null);
   };
+
+  const handleClearAll = () => {
+    const isConfirmed = window.confirm(
+      "Are you sure you want to clear all tasks?"
+    );
+
+    if (isConfirmed) {
+      const updatedItems = items.filter((item) => !item.packed);
+      updateItems(updatedItems);
+    }
+  };
+
+  if (items.length === 0) {
+    return null;
+  }
 
   return (
     <Card sx={{ width: 600 }}>
@@ -149,9 +199,9 @@ function ListTasks({ items, onDeleteItem, onEditItem }) {
                   <div style={{ display: "flex", alignItems: "center" }}>
                     <Checkbox
                       checked={item.packed}
-                      onChange={() => console.log("Checkbox changed")}
                       color="success"
                       variant="outlined"
+                      onChange={() => onCheckboxToggle(item.id)}
                     />
                     <Grid xs={11}>
                       <Input
@@ -217,6 +267,17 @@ function ListTasks({ items, onDeleteItem, onEditItem }) {
             </Sheet>
           ))}
         </ul>
+
+        <Grid container spacing={2} sx={{ flexGrow: 1, marginLeft: "30px" }}>
+          <Grid xs={9}>
+            <Slider color="success" value={progress} />
+          </Grid>
+          <Grid xs={3}>
+            <Button color="success" onClick={handleClearAll}>
+              Clear All
+            </Button>
+          </Grid>
+        </Grid>
       </CardContent>
     </Card>
   );
