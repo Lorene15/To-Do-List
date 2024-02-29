@@ -65,6 +65,12 @@ button:focus-visible {
   }
 }
 
+@media screen and (max-width: 600px) {
+  a {
+    font-size: 14px;
+  }
+}
+
 .app {
   display: flex;
   justify-content: center;
