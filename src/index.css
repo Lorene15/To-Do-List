@@ -76,6 +76,10 @@ button:focus-visible {
   text-align: center;
 }
 
+.spacer {
+  margin-top: 20px;
+}
+
 .header {
   display: flex;
   justify-content: center;
