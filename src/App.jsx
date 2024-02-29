@@ -113,7 +113,7 @@ function Form({ onHandleAddItems, setShowList }) {
     <Card sx={{ width: 600 }}>
       <CardContent>
         <form onSubmit={handleSubmit}>
-          <Grid container spacing={2} sx={{ flexGrow: 1 }}>
+          <Grid container spacing={2} sx={{ flexGrow: 1, marginLeft: "30px" }}>
             <Grid xs={9}>
               <Input
                 color="success"
@@ -184,7 +184,13 @@ function ListTasks({
   }
 
   return (
-    <Card sx={{ width: 600 }}>
+    <Card
+      sx={{
+        overflowY: "auto",
+        maxWidth: "600px",
+        maxHeight: "500px",
+      }}
+    >
       <CardContent>
         <ul>
           {items.map((item) => (
